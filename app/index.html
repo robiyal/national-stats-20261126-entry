@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arunika · Statistik Indonesia</title>
+<meta name="description" content="Arunika menyajikan angka-angka Indonesia — penduduk, ekonomi, dan sosial — dari sumber resmi, dengan grafik dan tabel yang bisa dijelajahi.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<script type="module" src="main.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#/">ARUNIKA<em>·</em><small>Statistik Indonesia</small></a>
+    <nav class="main" aria-label="Navigasi utama">
+      <a href="#/" data-route="">Beranda</a>
+      <a href="#/penduduk" data-route="penduduk">Penduduk</a>
+      <a href="#/ekonomi" data-route="ekonomi">Ekonomi</a>
+      <a href="#/sosial" data-route="sosial">Sosial</a>
+      <a href="#/daerah" data-route="daerah">Daerah</a>
+      <a href="#/metodologi" data-route="metodologi">Metodologi</a>
+    </nav>
+    <div class="yearbox">
+      <label for="year">Tahun</label>
+      <select id="year" aria-label="Pilih tahun data">
+        <option value="2021">2021</option>
+        <option value="2022">2022</option>
+        <option value="2023">2023</option>
+        <option value="2024" selected>2024</option>
+      </select>
+    </div>
+  </div>
+</header>
+<main id="app"></main>
+<footer class="site">
+  <div class="wrap">
+    <b>Arunika · Statistik Indonesia</b> — situs statistik independen yang merangkum angka resmi Indonesia agar mudah dibaca.
+    Semua angka di situs ini disertai sumber dan tahun. Data diolah dari publikasi Badan Pusat Statistik (BPS) dan Bank Indonesia.
+    Arunika bukan situs resmi pemerintah dan tidak berafiliasi dengan BPS. Terakhir diperbarui November 2026.
+  </div>
+</footer>
+</body>
+</html>
