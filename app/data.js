@@ -14,6 +14,11 @@ export const SERIES = {
   unemployment: { label: 'Pengangguran terbuka (Agustus)', unit: '%', decimals: 2, source: 'BPS, Sakernas Agustus', values: [6.49, 5.86, 5.32, 4.91] },
   poverty: { label: 'Kemiskinan (Maret)', unit: '%', decimals: 2, source: 'BPS, Susenas Maret', values: [10.14, 9.54, 9.36, 9.03] },
   gdpUsd: { label: 'PDB nominal', unit: ' mld US$', decimals: 0, source: 'Bank Dunia', values: [1187, 1319, 1371, 1396] },
+  // IPM nasional 2021–2024 (BPS, seri terbaru publikasi IPM; siaran pers
+  // 15 Nov 2024 dan 5 Nov 2025). Angka 2021–2022 sesuai seri yang dipakai
+  // BPS saat ini — 2021 adalah 73,16, bukan 72,29 dari rilis awal 2021,
+  // karena BPS memutakhirkan seri IPM-nya.
+  hdi: { label: 'IPM nasional', unit: '', decimals: 2, source: 'BPS, publikasi Indeks Pembangunan Manusia', values: [73.16, 73.77, 74.39, 75.02] },
 };
 
 // 2024-only headline facts, shown with their own year labels.
@@ -110,9 +115,45 @@ export const PROVINCES = [
 
 export const REGIONS = ['Semua', 'Jawa', 'Sumatera', 'Kalimantan', 'Sulawesi', 'Nusa Tenggara', 'Maluku', 'Papua'];
 
+// IPM per provinsi 2024 (BPS, rilis 15 November 2024; IPM nasional 75,02).
+// Nilai di bawah disalin dari tabel resmi BPS per provinsi.
+export const IPM_2024 = {
+  'Aceh': 75.36, 'Sumatera Utara': 75.76, 'Sumatera Barat': 76.43, 'Riau': 75.67,
+  'Jambi': 74.36, 'Sumatera Selatan': 73.84, 'Bengkulu': 74.91, 'Lampung': 73.13,
+  'Kepulauan Bangka Belitung': 74.55, 'Kepulauan Riau': 79.89, 'DKI Jakarta': 84.15,
+  'Jawa Barat': 74.92, 'Jawa Tengah': 73.87, 'DI Yogyakarta': 81.62, 'Jawa Timur': 75.35,
+  'Banten': 76.35, 'Bali': 78.63, 'Nusa Tenggara Barat': 73.10, 'Nusa Tenggara Timur': 69.14,
+  'Kalimantan Barat': 71.19, 'Kalimantan Tengah': 74.28, 'Kalimantan Selatan': 75.19,
+  'Kalimantan Timur': 78.79, 'Kalimantan Utara': 73.41, 'Sulawesi Utara': 75.68,
+  'Sulawesi Tengah': 72.24, 'Sulawesi Selatan': 75.18, 'Sulawesi Tenggara': 73.62,
+  'Gorontalo': 72.01, 'Sulawesi Barat': 70.46, 'Maluku': 73.40, 'Maluku Utara': 71.84,
+  'Papua Barat': 67.69, 'Papua Barat Daya': 69.65, 'Papua': 73.83, 'Papua Selatan': 68.86,
+  'Papua Tengah': 60.25, 'Papua Pegunungan': 54.43,
+};
+
+// PDRB per kapita ADHB (seri 2010) per provinsi 2024, dalam ribu rupiah
+// (BPS, "[Seri 2010] Produk Domestik Regional Bruto Per Kapita (Ribu
+// Rupiah), 2024"; angka 2024 masih sementara). Rata-rata nasional 78.617
+// ribu rupiah = Rp 78,62 juta — cocok dengan PDB per kapita di FACTS_2024.
+export const PDRB_PC_2024 = {
+  'Aceh': 43782, 'Sumatera Utara': 73575, 'Sumatera Barat': 57047, 'Riau': 165350,
+  'Jambi': 86722, 'Sumatera Selatan': 75132, 'Bengkulu': 49233, 'Lampung': 51370,
+  'Kepulauan Bangka Belitung': 70194, 'Kepulauan Riau': 161424, 'DKI Jakarta': 344349,
+  'Jawa Barat': 56080, 'Jawa Tengah': 47972, 'DI Yogyakarta': 51473, 'Jawa Timur': 75770,
+  'Banten': 70275, 'Bali': 67318, 'Nusa Tenggara Barat': 32282, 'Nusa Tenggara Timur': 24272,
+  'Kalimantan Barat': 52703, 'Kalimantan Tengah': 79320, 'Kalimantan Selatan': 67117,
+  'Kalimantan Timur': 212175, 'Kalimantan Utara': 198429, 'Sulawesi Utara': 69352,
+  'Sulawesi Tengah': 120750, 'Sulawesi Selatan': 73573, 'Sulawesi Tenggara': 67840,
+  'Gorontalo': 44433, 'Sulawesi Barat': 42718, 'Maluku': 32198, 'Maluku Utara': 70659,
+  'Papua Barat': 131637, 'Papua Barat Daya': 59064, 'Papua': 81009, 'Papua Selatan': 61583,
+  'Papua Tengah': 118774, 'Papua Pegunungan': 18105,
+};
+
 export const SOURCES = [
   { name: 'Badan Pusat Statistik (BPS)', note: 'Estimasi penduduk pertengahan tahun; PDB dan pertumbuhan ekonomi; IHK Desember; Sakernas Agustus; Susenas Maret; IPM dan indikator kesejahteraan 2024.' },
   { name: 'Bank Indonesia', note: 'Cadangan devisa akhir Desember 2024.' },
+  { name: 'Badan Pusat Statistik (BPS) — IPM', note: 'Indeks Pembangunan Manusia menurut provinsi 2024, rilis 15 November 2024; IPM nasional 2021–2024 dari publikasi Indeks Pembangunan Manusia.' },
+  { name: 'Badan Pusat Statistik (BPS) — PDRB per kapita', note: 'PDRB per kapita ADHB (seri 2010) menurut provinsi 2024; angka 2024 masih sementara dan dapat direvisi.' },
   { name: 'Bank Dunia (World Bank)', note: 'PDB nominal dalam dolar AS dan PDB per kapita; World Development Indicators.' },
   { name: 'Perserikatan Bangsa-Bangsa (UN WPP 2024)', note: 'Usia median dan struktur umur penduduk.' },
   { name: 'Wikipedia — Provinces of Indonesia', note: 'Tabel provinsi: penduduk pertengahan 2024 dan luas wilayah, bersumber pada estimasi BPS.' },
