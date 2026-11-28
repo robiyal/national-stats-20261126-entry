@@ -1,6 +1,6 @@
 // Page renderers. Each returns HTML for #app. Every figure carries its source
 // and year next to it; nothing renders without a source line.
-import { YEARS, SERIES, FACTS_2024, FINDINGS, PROVINCES, REGIONS, SOURCES, fmtId, density } from './data.js';
+import { YEARS, SERIES, FACTS_2024, FINDINGS, PROVINCES, REGIONS, SOURCES, IPM_2024, PDRB_PC_2024, fmtId, density } from './data.js';
 import { lineChart, barChart, hbarChart, PALETTE } from './charts.js';
 
 const wrap = (inner) => `<div class="wrap">${inner}</div>`;
@@ -40,7 +40,7 @@ export function home(year) {
       ${kpiCard('Inflasi (Des, yoy)', fmtId(inf, 2), '%', 'BPS, IHK ' + year, 'gold')}
       ${kpiCard('Pengangguran', fmtId(unemp, 2), '%', 'BPS, Sakernas Agustus ' + year)}
       ${kpiCard('Kemiskinan', fmtId(pov, 2), '%', 'BPS, Susenas Maret ' + year, 'warm')}
-      ${kpiCard('PDB nominal', 'US$ ' + fmtId(gdpUsd, 0), 'miliar', year === 2024 ? 'Rp 22.139 triliun (BPS 2024)' : 'Bank Dunia ' + year, 'gold')}
+      ${kpiCard('PDB nominal', 'US$ ' + fmtId(gdpUsd, 0), '', year === 2024 ? 'miliar US$ · Rp 22.139 triliun (BPS 2024)' : 'miliar US$ · Bank Dunia ' + year, 'gold')}
     </div>
     <div class="grid2">
       <div class="card">
@@ -69,7 +69,7 @@ export function home(year) {
     </div>
     <div class="card">
       <h2>Jelajahi datanya</h2>
-      <p><a href="#/penduduk">Penduduk</a> — struktur umur dan sebaran pulau · <a href="#/ekonomi">Ekonomi</a> — PDB, inflasi, perdagangan · <a href="#/sosial">Sosial</a> — kemiskinan, pengangguran, pendidikan, kesehatan · <a href="#/daerah">Daerah</a> — semua 38 provinsi, bisa dicari dan diurutkan · <a href="#/metodologi">Metodologi</a> — dari mana setiap angka berasal.</p>
+      <p><a href="#/penduduk">Penduduk</a> — struktur umur dan sebaran pulau · <a href="#/ekonomi">Ekonomi</a> — PDB, inflasi, perdagangan · <a href="#/sosial">Sosial</a> — kemiskinan, pengangguran, pendidikan, kesehatan · <a href="#/daerah">Daerah</a> — semua 38 provinsi, bisa dicari dan diurutkan · <a href="#/perbandingan">Perbandingan</a> — tiga provinsi berdampingan, tabel yang bisa diurutkan · <a href="#/metodologi">Metodologi</a> — dari mana setiap angka berasal.</p>
     </div>
   `)}`;
 }
@@ -137,7 +137,13 @@ export function ekonomi(year) {
         ${src('BPS, IHK Desember year-on-year.')}
       </div>
     </div>
-    <div class="card">
+    <div class="card" style="margin-top:16px">
+      <h2>PDRB per kapita 2024 — 10 provinsi teratas (juta rupiah)</h2>
+      ${hbarChart({ rows: [...PROVINCES].sort((a, b) => PDRB_PC_2024[b.name] - PDRB_PC_2024[a.name]).slice(0, 10).map((p) => ({ label: p.name, value: PDRB_PC_2024[p.name] / 1000 })), color: PALETTE.AMBER, unit: ' jt', decimals: 1 })}
+      <p class="chart-note">DKI Jakarta Rp 344,3 juta per orang — 4,4 kali rata-rata nasional (Rp 78,6 juta). Lima teratas semuanya berbasis jasa atau tambang; Papua Pegunungan terendah, Rp 18,1 juta.</p>
+      ${src('BPS, PDRB per kapita ADHB (seri 2010) 2024, angka sementara. Rata-rata nasional Rp 78,62 juta.')}
+    </div>
+    <div class="card" style="margin-top:16px">
       <h2>Indikator ekonomi 2021–2024</h2>
       <table class="data">
         <thead><tr><th>Indikator</th><th class="num">2021</th><th class="num">2022</th><th class="num">2023</th><th class="num">2024</th><th>Sumber</th></tr></thead>
@@ -189,6 +195,12 @@ export function sosial(year) {
         <p class="chart-note">Maret 2025 turun lagi ke 8,47% — ${FACTS_2024.povertyPeople} (${FACTS_2024.povertyPeopleSource}).</p>
         ${src('BPS, Susenas Maret.')}
       </div>
+    </div>
+    <div class="card">
+      <h2>IPM naik setiap tahun, 2021–2024</h2>
+      ${lineChart({ labels: YEARS.map(String), values: SERIES.hdi.values, color: PALETTE.GREEN, unit: '', decimals: 2 })}
+      <p class="chart-note">IPM nasional naik dari 73,16 (2021) ke 75,02 (2024). Jarak antarprovinsi tetap lebar: DKI Jakarta 84,15, Papua Pegunungan 54,43 — selisih 29,72 poin.</p>
+      ${src('BPS, publikasi Indeks Pembangunan Manusia; angka 2021–2023 sesuai seri terbaru BPS.')}
     </div>
     <div class="grid2">
       <div class="card">
@@ -251,6 +263,54 @@ export function daerah() {
   `);
 }
 
+export function perbandingan() {
+  const optSel = (def) => PROVINCES.map((p) => `<option value="${p.name}"${p.name === def ? ' selected' : ''}>${p.name}</option>`).join('');
+  return wrap(`
+    <div class="page-head"><div class="eyebrow">Perbandingan · 38 provinsi</div>
+    <h1>Tiga provinsi, berdampingan.</h1>
+    <p>Pilih tiga provinsi dan satu indikator. Tabel pertama membandingkan kelimanya berdampingan; tabel kedua memuat semua 38 provinsi dan bisa diurutkan per kolom.</p></div>
+    <div class="controls">
+      <select id="cmp-a" aria-label="Provinsi pertama">${optSel('DKI Jakarta')}</select>
+      <select id="cmp-b" aria-label="Provinsi kedua">${optSel('Jawa Barat')}</select>
+      <select id="cmp-c" aria-label="Provinsi ketiga">${optSel('Papua')}</select>
+      <select id="cmp-metric" aria-label="Indikator grafik">
+        <option value="ipm" selected>Grafik: IPM 2024</option>
+        <option value="pdrb">Grafik: PDRB per kapita 2024</option>
+        <option value="pop">Grafik: Penduduk 2024</option>
+        <option value="density">Grafik: Kepadatan</option>
+      </select>
+    </div>
+    <div class="card">
+      <h2>Berdampingan</h2>
+      <table class="data">
+        <thead><tr><th>Indikator</th><th id="cmp-h-a"></th><th id="cmp-h-b"></th><th id="cmp-h-c"></th></tr></thead>
+        <tbody id="cmp-rows"></tbody>
+      </table>
+      <p class="chart-note">Sel berlatar hijau = nilai tertinggi di antara ketiganya (untuk IPM dan PDRB per kapita).</p>
+      ${src('BPS: penduduk pertengahan 2024; IPM 2024 (rilis 15 Nov 2024); PDRB per kapita ADHB 2024, angka sementara. Kepadatan dihitung dari penduduk dibagi luas.')}
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2 id="cmp-chart-title">IPM 2024</h2>
+      <div id="cmp-chart"></div>
+      <p class="src" id="cmp-chart-src">Sumber: BPS, IPM per provinsi 2024 (rilis 15 Nov 2024).</p>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>Semua 38 provinsi <span id="cmp-count" style="font-size:15px;color:var(--muted)"></span></h2>
+      <table class="data">
+        <thead><tr>
+          <th><button class="sortbtn" data-csort="name">Provinsi ↕</button></th>
+          <th class="num"><button class="sortbtn" data-csort="pop">Penduduk ↕</button></th>
+          <th class="num"><button class="sortbtn" data-csort="ipm">IPM 2024 ↕</button></th>
+          <th class="num"><button class="sortbtn" data-csort="pdrb">PDRB/kapita ↕</button></th>
+          <th class="num hide-phone"><button class="sortbtn" data-csort="density">Kepadatan ↕</button></th>
+        </tr></thead>
+        <tbody id="cmp-full-rows"></tbody>
+      </table>
+      ${src('BPS 2024: penduduk pertengahan tahun; IPM (rilis 15 Nov 2024); PDRB per kapita ADHB, angka sementara. Kepadatan dihitung dari penduduk dibagi luas.')}
+    </div>
+  `);
+}
+
 export function metodologi() {
   return wrap(`
     <div class="page-head"><div class="eyebrow">Metodologi</div>
@@ -270,6 +330,8 @@ export function metodologi() {
         <li><b>Kemiskinan</b> memakai Susenas Maret; garis kemiskinan dihitung dari kebutuhan minimum makanan dan non-makanan.</li>
         <li><b>Penduduk</b> memakai estimasi pertengahan tahun BPS. Estimasi PBB/World Bank sedikit lebih tinggi (283,5 juta pada 2024) karena memakai asumsi yang berbeda.</li>
         <li><b>Kepadatan provinsi</b> dihitung dari penduduk pertengahan 2024 dibagi luas wilayah daratan provinsi.</li>
+        <li><b>IPM</b> (Indeks Pembangunan Manusia) mengukur kesehatan (harapan hidup), pendidikan (harapan dan rata-rata lama sekolah), dan standar hidup (pengeluaran per kapita). Skala 0–100; di atas 80 “sangat tinggi”, 70–80 “tinggi”, 60–70 “sedang”, di bawah 60 “rendah”. Angka 2021–2023 memakai seri terbaru BPS — 2021 adalah 73,16, berbeda dari angka rilis awal 72,29 karena BPS memutakhirkan serinya.</li>
+        <li><b>PDRB per kapita</b> adalah nilai tambah seluruh lapangan usaha di suatu provinsi dibagi penduduknya, atas dasar harga berlaku (seri 2010). Angka 2024 masih sementara dan dapat direvisi BPS; provinsi bertambang (Kalimantan Timur, Papua Barat) dan ibu kota jasa (DKI Jakarta) mencatat angka tertinggi.</li>
       </ul>
     </div>
     <div class="card" style="margin-top:16px">
