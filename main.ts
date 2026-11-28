@@ -25,7 +25,7 @@ if (existsSync(join(here, 'screenshots'))) cpSync(join(here, 'screenshots'), joi
 if (!existsSync(join(here, 'app', 'index.html'))) {
   throw new Error('app/index.html is missing: the site was not built');
 }
-const shotFiles = ['1-home.jpg', '2-ekonomi.jpg', '3-daerah.jpg', '4-home-phone.jpg'];
+const shotFiles = ['1-home.jpg', '2-ekonomi.jpg', '3-perbandingan.jpg', '4-home-phone.jpg'];
 for (const f of shotFiles) {
   if (!existsSync(join(here, 'screenshots', f))) throw new Error(`screenshots/${f} is missing: take the screenshots first`);
 }
