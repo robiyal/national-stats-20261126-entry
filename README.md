@@ -6,6 +6,8 @@
 
 Arunika menyajikan angka-angka Indonesia — penduduk, ekonomi, dan sosial — dari sumber resmi (BPS, Bank Indonesia, dan Bank Dunia), dengan grafik dan tabel yang bisa dijelajahi. Tanpa framework dan tanpa jaringan: seluruh data tersimpan di dalam situs.
 
+V2 (28 Nov 2026): halaman Perbandingan (tiga provinsi berdampingan + tabel 38 provinsi yang bisa diurutkan), grafik PDRB per kapita per provinsi, dan tren IPM 2021–2024. Semua angka baru bersumber BPS 2024.
+
 ## Run it
 
 ```sh
