@@ -2,8 +2,8 @@
 // re-renders the national pages with that year's figures. window.__shotReady
 // is false while a page renders and true once it is on screen, so a
 // screenshot script knows when to capture.
-import { YEARS, SERIES, PROVINCES, fmtId, density } from './data.js';
-import { home, penduduk, ekonomi, sosial, daerah, metodologi, notFound } from './views.js';
+import { YEARS, SERIES, PROVINCES, IPM_2024, PDRB_PC_2024, fmtId, density } from './data.js';
+import { home, penduduk, ekonomi, sosial, daerah, perbandingan, metodologi, notFound } from './views.js';
 import { lineChart, hbarChart, PALETTE } from './charts.js';
 
 const app = document.getElementById('app');
@@ -96,6 +96,112 @@ function wireDaerah() {
   renderDaerahLists();
 }
 
+// ---- Perbandingan page state ----
+const compareState = { a: 'DKI Jakarta', b: 'Jawa Barat', c: 'Papua', metric: 'ipm', sortKey: 'ipm', sortDir: -1 };
+
+const CMP_METRICS = {
+  ipm: { label: 'IPM 2024', get: (p) => IPM_2024[p.name], unit: '', decimals: 2, src: 'BPS, IPM per provinsi 2024 (rilis 15 Nov 2024).' },
+  pdrb: { label: 'PDRB per kapita 2024 (Rp juta)', get: (p) => PDRB_PC_2024[p.name] / 1000, unit: ' jt', decimals: 1, src: 'BPS, PDRB per kapita ADHB 2024, angka sementara.' },
+  pop: { label: 'Penduduk 2024 (juta jiwa)', get: (p) => p.pop / 1e6, unit: ' jt', decimals: 1, src: 'BPS, estimasi penduduk pertengahan 2024.' },
+  density: { label: 'Kepadatan (jiwa/km²)', get: (p) => density(p), unit: '', decimals: 0, src: 'BPS 2024; kepadatan dihitung dari penduduk dibagi luas.' },
+};
+
+function argmax(list, fn) {
+  let best = 0;
+  for (let i = 1; i < list.length; i++) if (fn(list[i]) > fn(list[best])) best = i;
+  return best;
+}
+
+function renderCompare() {
+  const sel = [compareState.a, compareState.b, compareState.c]
+    .map((n) => PROVINCES.find((p) => p.name === n)).filter(Boolean);
+  if (sel.length < 3) return;
+  ['a', 'b', 'c'].forEach((k, i) => {
+    const h = document.getElementById('cmp-h-' + k);
+    if (h) h.textContent = sel[i].name;
+  });
+  const rows = [
+    { label: 'Penduduk (2024)', cells: sel.map((p) => fmtId(p.pop) + ' jiwa'), best: -1 },
+    { label: 'Kepadatan', cells: sel.map((p) => fmtId(density(p), 0) + ' /km²'), best: -1 },
+    { label: 'Luas wilayah', cells: sel.map((p) => fmtId(p.area) + ' km²'), best: -1 },
+    { label: 'IPM 2024', cells: sel.map((p) => fmtId(IPM_2024[p.name], 2)), best: argmax(sel, (p) => IPM_2024[p.name]) },
+    { label: 'PDRB per kapita 2024', cells: sel.map((p) => 'Rp ' + fmtId(PDRB_PC_2024[p.name] / 1000, 1) + ' jt'), best: argmax(sel, (p) => PDRB_PC_2024[p.name]) },
+  ];
+  const body = document.getElementById('cmp-rows');
+  if (body) {
+    body.innerHTML = rows.map((r) => `<tr><td><b>${r.label}</b></td>` +
+      r.cells.map((c, i) => `<td class="num${i === r.best ? ' cmp-best' : ''}">${c}</td>`).join('') + '</tr>').join('');
+  }
+  const m = CMP_METRICS[compareState.metric];
+  const title = document.getElementById('cmp-chart-title');
+  if (title) title.textContent = m.label;
+  const chartSrc = document.getElementById('cmp-chart-src');
+  if (chartSrc) chartSrc.textContent = 'Sumber: ' + m.src;
+  const chart = document.getElementById('cmp-chart');
+  if (chart) {
+    chart.innerHTML = hbarChart({ rows: sel.map((p) => ({ label: p.name, value: m.get(p) })), color: PALETTE.TEAL, unit: m.unit, decimals: m.decimals });
+  }
+}
+
+function renderCompareFull() {
+  const rows = document.getElementById('cmp-full-rows');
+  if (!rows) return;
+  const get = {
+    name: (p) => p.name,
+    pop: (p) => p.pop,
+    ipm: (p) => IPM_2024[p.name],
+    pdrb: (p) => PDRB_PC_2024[p.name],
+    density: (p) => density(p),
+  }[compareState.sortKey];
+  const list = [...PROVINCES].sort((a, b) => {
+    const va = get(a), vb = get(b);
+    const c = typeof va === 'string' ? va.localeCompare(vb, 'id') : va - vb;
+    return c * compareState.sortDir;
+  });
+  const count = document.getElementById('cmp-count');
+  if (count) count.textContent = `— ${list.length} provinsi`;
+  rows.innerHTML = list.map((p) => `<tr>
+    <td><b>${p.name}</b></td>
+    <td class="num">${fmtId(p.pop)}</td>
+    <td class="num">${fmtId(IPM_2024[p.name], 2)}</td>
+    <td class="num">Rp ${fmtId(PDRB_PC_2024[p.name] / 1000, 1)} jt</td>
+    <td class="num hide-phone">${fmtId(density(p), 0)} /km²</td>
+  </tr>`).join('');
+}
+
+function wirePerbandingan() {
+  const a = document.getElementById('cmp-a');
+  const b = document.getElementById('cmp-b');
+  const c = document.getElementById('cmp-c');
+  const m = document.getElementById('cmp-metric');
+  if (!a) return;
+  const picks = { a, b, c };
+  Object.entries(picks).forEach(([key, el]) => {
+    el.addEventListener('change', () => {
+      const old = compareState[key];
+      const val = el.value;
+      // Choosing a province another slot already holds swaps that slot
+      // to the old value instead of showing the same province twice.
+      Object.entries(picks).forEach(([k2, el2]) => {
+        if (k2 !== key && compareState[k2] === val) { compareState[k2] = old; el2.value = old; }
+      });
+      compareState[key] = val;
+      renderCompare();
+    });
+  });
+  m.addEventListener('change', () => { compareState.metric = m.value; renderCompare(); });
+  document.querySelectorAll('[data-csort]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const k = btn.dataset.csort;
+      if (compareState.sortKey === k) compareState.sortDir *= -1;
+      else { compareState.sortKey = k; compareState.sortDir = k === 'name' ? 1 : -1; }
+      renderCompareFull();
+    });
+  });
+  renderCompare();
+  renderCompareFull();
+}
+
 function wireHomeChart() {
   const box = document.getElementById('home-chart');
   if (!box) return;
@@ -116,19 +222,21 @@ const TITLES = {
   ekonomi: 'Ekonomi | Arunika',
   sosial: 'Sosial | Arunika',
   daerah: 'Daerah · 38 Provinsi | Arunika',
+  perbandingan: 'Perbandingan 3 Provinsi | Arunika',
   metodologi: 'Metodologi | Arunika',
 };
 
 function render() {
   window.__shotReady = false;
   const route = (location.hash.replace(/^#\/?/, '').split('?')[0] || '');
-  const pages = { '': () => home(year), penduduk: () => penduduk(year), ekonomi: () => ekonomi(year), sosial: () => sosial(year), daerah, metodologi };
+  const pages = { '': () => home(year), penduduk: () => penduduk(year), ekonomi: () => ekonomi(year), sosial: () => sosial(year), daerah, perbandingan, metodologi };
   const fn = pages[route];
   document.title = TITLES[route] ?? 'Arunika · Statistik Indonesia';
   app.innerHTML = fn ? fn() : notFound();
   setActiveNav(route);
   if (route === '') wireHomeChart();
   if (route === 'daerah') wireDaerah();
+  if (route === 'perbandingan') wirePerbandingan();
   window.scrollTo(0, 0);
   window.__shotReady = true;
 }
