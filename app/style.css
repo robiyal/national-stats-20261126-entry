@@ -73,7 +73,7 @@ nav.main a.active { background: #fbbf24; color: #1d2019; }
 .kpi.warm { border-top-color: var(--terra); }
 .kpi.gold { border-top-color: var(--amber); }
 .kpi-label { font-family: -apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size: 11.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-.kpi-num { font-size: 27px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1; }
+.kpi-num { font-size: 27px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1; white-space: nowrap; }
 .kpi-unit { font-size: 13px; font-weight: 700; color: var(--ink-soft); }
 .kpi-sub { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
 .kpi-delta { font-family: -apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size: 12px; font-weight: 700; }
@@ -130,6 +130,7 @@ table.data tr:hover td { background: #fbf8ef; }
 .chip[aria-pressed="true"] { background: var(--terra); border-color: var(--terra); color: #fff; }
 .sortbtn { background: none; border: 0; cursor: pointer; font: inherit; color: inherit; padding: 0; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; font-weight: 700; }
 .sortbtn:hover { color: var(--green); }
+.cmp-best { background: var(--green-soft); }
 
 /* ---- misc ---- */
 .page-head { padding: 22px 0 4px; }
